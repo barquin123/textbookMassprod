@@ -4,7 +4,18 @@ window.handleInput = (e) => {
 };
 
 
-let globalContent = '';
+const dataModule = (function() {
+    let parsedData = null;
+
+    return {
+        setParsedData: function(data) {
+            parsedData = data;
+        },
+        getParsedData: function() {
+            return parsedData;
+        }
+    };
+})();
 
 document.getElementById('csvFile').addEventListener('change', function(event) {
     const file = event.target.files[0];
@@ -12,32 +23,32 @@ document.getElementById('csvFile').addEventListener('change', function(event) {
         const reader = new FileReader();
         reader.onload = function(e) {
             const content = e.target.result;
-            globalContent = content;
+            const parsedData = parseCSVData(content);
+            dataModule.setParsedData(parsedData);
 
-            // Parse the CSV content into an array
-            const parsedData = parseCSVData(globalContent);
-
-            // Get the number of splits from the input field
-            const splitCount = parseInt(document.getElementById('numberOfrows').value, 10);
-
-            if (isNaN(splitCount) || splitCount < 1) {
-                alert('Please enter a valid number of splits.');
-                return;
-            }
-
-            // Split the data into the specified number of parts
-            const splitData = splitArray(parsedData, splitCount);
-
-            // Display the split result in the output element
-            document.getElementById('output').innerText = JSON.stringify(splitData, null, 2);
+            // Display the parsed data in the output element
+            document.getElementById('output').innerText = JSON.stringify(parsedData, null, 2);
 
             // Log the split data
-            console.log(splitData);
+            // console.log(parsedData);
+            processCSVData()
         };
         reader.readAsText(file);
     }
 });
 
+
+function processCSVData() {
+    const csvData = dataModule.getParsedData();
+}
+
+
+// function someOtherFunction() {
+//     const data = dataModule.getParsedData();
+//     if (data) {
+//         console.log(data);
+//     }
+// }
 // Function to parse CSV data
 function parseCSVData(csvData) {
     const lines = csvData.split(/\r?\n/); // Split into lines
@@ -80,19 +91,20 @@ function parseCSVLine(line) {
     return fields;
 }
 
+
 // Function to split an array into a specified number of chunks without nested arrays
-function splitArray(array, chunks) {
-    const result = [];
-    const chunkSize = Math.ceil(array.length / chunks);
+// function splitArray(array, chunks) {
+//     const result = [];
+//     const chunkSize = Math.ceil(array.length / chunks);
 
-    for (let i = 0; i < chunks; i++) {
-        const start = i * chunkSize;
-        const end = start + chunkSize;
-        result.push(...array.slice(start, end));
-    }
+//     for (let i = 0; i < chunks; i++) {
+//         const start = i * chunkSize;
+//         const end = start + chunkSize;
+//         result.push(...array.slice(start, end));
+//     }
 
-    return result;
-}
+//     return result;
+// }
 
 
 //wrapping text with tags
