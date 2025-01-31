@@ -11,30 +11,18 @@
         <input type="text" name="htmlName" id="htmlName" oninput="handleInput(event)">
         <div class="clearfix"></div>
         <!-- <input type="number" name="numberOfrows" id="numberOfrows"> -->
-         <input type="text" name="var1" id="var1" oninput="handleInput(event)">
-         <div class="clearfix"></div>
+         <div id="inputFields" class="textClone"></div>
         <input type="file" name="csvFile" id="csvFile" accept=".csv">
         <pre id="output"></pre>
-        <div id="container" style="width: 300px; height: 300px;"></div>
+        <div id="container" style="width: 300px; height: 300px;">
+        </div>
+        <div id="testBtn">testBtn</div>
         <button onsubmit="submitForm()">submit</button>
     </form>
     <script defer src="./index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/loader.js"></script>
     <script>
-    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs' }});
-    require(['vs/editor/editor.main'], function () {
-        const editor = monaco.editor.create(document.getElementById('container'), {
-        value: '',
-        language: 'javascript', // You can change the language based on your needs
-        theme: 'vs-dark', // Set the editor theme
-        automaticLayout: true, // Make editor resize automatically with the window
-        });
-        editor.onDidChangeModelContent(function (event) {
-            const editorValue = editor.getValue();
-            console.log('Editor content:', editorValue); // Log or use the value as needed
-        });
-    });
+        
     </script>
-
 </body>
 </html>
