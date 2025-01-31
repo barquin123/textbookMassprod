@@ -86,6 +86,7 @@ function createFields(numberOfColumns, parsedData) {
     }
 }
 
+
 // Function to parse CSV data
 function parseCSVData(csvData) {
     const lines = csvData.split(/\r?\n/); // Split into lines
@@ -146,25 +147,17 @@ require(['vs/editor/editor.main'], function () {
     });
 });
 
-function addButtonListener() {
-    const button = document.getElementById('testBtn');
-    if (button) {
-        button.addEventListener('click', function() {
-            try {
-                const editorContent = editorValue.getEditorContent();
-                if (editorContent) {
-                    console.log('Editor content:', editorContent);
-                } else {
-                    console.log('Editor content is empty.');
-                }
-            } catch (error) {
-                console.error('Error fetching editor content:', error);
-            }
-        });
-    } else {
-        console.warn('Button not found!');
+// JavaScript to handle form submission
+document.getElementById('appForm').onsubmit = function(event) {
+    // Prevent the default form submission behavior
+    event.preventDefault();
+    const editorContent = editorValue.getEditorContent();
+    const parsedData = dataModule.getParsedData();
+    for (let i = 0; i < parsedData.length; i++) {
+        const entry = parsedData[i];
+        console.log('Entry:', entry);
     }
-}
 
-// Call this function after the button is added to the DOM
-addButtonListener();
+    // console.log('Editor content:', editorContent);
+    // console.log('Parsed data:', parsedData.length);
+  };
