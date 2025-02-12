@@ -1,0 +1,17 @@
+ul#languageSelector {
+    display: flex;
+    justify-content: start;
+    gap: 10px;
+    padding: 0;
+    margin: 0;
+}
+
+ul#languageSelector li {
+    list-style: none;
+    padding: 10px 20px;
+    background: #d2d2d2;
+}
+
+ul#languageSelector li.active {
+    background: antiquewhite;
+}

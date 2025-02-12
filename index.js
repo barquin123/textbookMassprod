@@ -60,8 +60,8 @@ function processCSVData() {
     if (csvData) {
         const numberOfColumns = csvData[0].length;
         createFields(numberOfColumns,csvData);
-        console.log(csvData[0].length);
-        console.log(csvData[0]);
+        // console.log(csvData[0].length);
+        // console.log(csvData[0]);
     }
 }
 
@@ -84,6 +84,36 @@ function createFields(numberOfColumns, parsedData) {
         clearFix.classList.add('clearfix');
         inputFieldsContainer.appendChild(clearFix);
     }
+}
+
+//aro ko ni hunong testingan panig mo dagan bani jay frank
+
+function handleVarInputes (entries,editContent,parseDataLength,index) {
+    const inputFieldsContainer = document.getElementById('inputFields');
+    const inputFields = inputFieldsContainer.querySelectorAll('input');
+    const inputValues = [];
+    const variableMapping = {};
+    for (let i = 0; i < entries.length; i++) {
+        // Construct the input name dynamically
+        const inputName = `text${i}`;
+        
+        // Find the input element by name
+        const inputField = inputFieldsContainer.querySelector(`input[name="${inputName}"]`);
+        
+        // Check if the input exists and get its value
+        if (inputField) {
+            const variableName = inputField.value.trim(); // User's input for variable name
+            
+            // Create the variable mapping if the input is not empty
+            if (variableName) {
+                variableMapping[variableName] = entries[i];
+            }
+        }
+    }
+    
+    console.log('Variable Mappings:', variableMapping);
+    return variableMapping;
+    
 }
 
 
@@ -136,10 +166,48 @@ require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest
 require(['vs/editor/editor.main'], function () {
     const editor = monaco.editor.create(document.getElementById('container'), {
     value: '',
-    language: 'javascript', // You can change the language based on your needs
+    language: 'html', // You can change the language based on your needs
     theme: 'vs-dark', // Set the editor theme
     automaticLayout: true, // Make editor resize automatically with the window
     });
+
+    //change language
+    function changeLanguage(newLanguage) {
+        const model = editor.getModel();
+        monaco.editor.setModelLanguage(model, newLanguage);
+    }
+
+   // Get reference to the parent UL
+        const languageSelector = document.getElementById('languageSelector');
+
+        // Set default language based on the active class
+        const defaultActive = languageSelector.querySelector('.active');
+        if (defaultActive) {
+            changeLanguage(defaultActive.dataset.language);
+        }
+
+        // Add event listener to the UL
+        languageSelector.addEventListener('click', function (event) {
+            // Check if the clicked target is an LI element
+            if (event.target && event.target.tagName === 'LI') {
+                // Remove 'active' class from the currently active item
+                const currentlyActive = languageSelector.querySelector('.active');
+                if (currentlyActive) {
+                    currentlyActive.classList.remove('active');
+                }
+
+                // Add 'active' class to the clicked LI
+                event.target.classList.add('active');
+
+                // Call the changeLanguage function with the selected language
+                const selectedLanguage = event.target.dataset.language;
+                if (selectedLanguage) {
+                    changeLanguage(selectedLanguage);
+                }
+            }
+        });
+
+
     editor.onDidChangeModelContent(function (event) {
         const editorVal = editor.getValue();
         // console.log('Editor content:', editorValue);
@@ -156,6 +224,8 @@ document.getElementById('appForm').onsubmit = function(event) {
     for (let i = 0; i < parsedData.length; i++) {
         const entry = parsedData[i];
         console.log('Entry:', entry);
+        var parseDataLength = parsedData[i].length;
+        handleVarInputes(entry,editorContent,parseDataLength,i);
     }
 
     // console.log('Editor content:', editorContent);
