@@ -87,6 +87,12 @@ function createFields(numberOfColumns, parsedData) {
 }
 
 //aro ko ni hunong testingan panig mo dagan bani jay frank
+function substituteVariables(template, variableMapping) {
+    return template.replace(/\${(.*?)}/g, (_, variableName) => {
+        // Replace placeholders with corresponding values from the mapping
+        return variableMapping[variableName] || `\${${variableName}}`;
+    });
+}
 
 function handleVarInputes (entries,editContent,parseDataLength,index) {
     const inputFieldsContainer = document.getElementById('inputFields');
@@ -111,17 +117,12 @@ function handleVarInputes (entries,editContent,parseDataLength,index) {
         }
     }
     
+    const result = substituteVariables(editContent, variableMapping);
     console.log('Variable Mappings:', variableMapping);
-    return variableMapping;
-    
+    console.log(result);
 }
 
-function substituteVariables(template, variableMapping) {
-    return template.replace(/\${(.*?)}/g, (_, variableName) => {
-        // Replace placeholders with corresponding values from the mapping
-        return variableMapping[variableName] || `\${${variableName}}`;
-    });
-}
+
 
 
 // Function to parse CSV data
