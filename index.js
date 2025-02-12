@@ -116,6 +116,13 @@ function handleVarInputes (entries,editContent,parseDataLength,index) {
     
 }
 
+function substituteVariables(template, variableMapping) {
+    return template.replace(/\${(.*?)}/g, (_, variableName) => {
+        // Replace placeholders with corresponding values from the mapping
+        return variableMapping[variableName] || `\${${variableName}}`;
+    });
+}
+
 
 // Function to parse CSV data
 function parseCSVData(csvData) {
