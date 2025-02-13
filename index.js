@@ -40,10 +40,10 @@ document.getElementById('csvFile').addEventListener('change', function(event) {
             const content = e.target.result;
             const parsedData = parseCSVData(content);
             dataModule.setParsedData(parsedData);
-            console.log(JSON.stringify(content));
+            console.log(parsedData);
 
             // Display the parsed data in the output element
-            document.getElementById('output').innerText = JSON.stringify(parsedData, null, 2);
+            // document.getElementById('output').innerText = JSON.stringify(parsedData, null, 2);
 
             // Log the split data
             // console.log(parsedData);
@@ -76,6 +76,7 @@ function createFields(numberOfColumns, parsedData) {
     for (let i = 0; i < numberOfColumns; i++) {
         const inputField = document.createElement('input');
         inputField.setAttribute('type', 'text');
+        inputField.setAttribute('required', 'required');
         inputField.setAttribute('name', `text${i}`);
         inputField.setAttribute('placeholder', parsedData[0][i]);
         inputField.setAttribute('oninput', 'handleInput(event)');
@@ -95,33 +96,36 @@ function substituteVariables(template, variableMapping) {
     });
 }
 
-function handleVarInputes (entries,editContent,parseDataLength,index) {
+function handleVarInputes(entries, editContent, parseDataLength, index) {
     const inputFieldsContainer = document.getElementById('inputFields');
-    const inputFields = inputFieldsContainer.querySelectorAll('input');
-    const inputValues = [];
     const variableMapping = {};
-    for (let i = 0; i < entries.length; i++) {
+
+    // Loop through all entries in the provided array
+    entries.forEach((entry, i) => {
         // Construct the input name dynamically
         const inputName = `text${i}`;
-        
-        // Find the input element by name
+
+        // Find the corresponding input element by name
         const inputField = inputFieldsContainer.querySelector(`input[name="${inputName}"]`);
-        
+
         // Check if the input exists and get its value
         if (inputField) {
             const variableName = inputField.value.trim(); // User's input for variable name
-            
-            // Create the variable mapping if the input is not empty
+
+            // Add the mapping if the variableName is valid
             if (variableName) {
-                variableMapping[variableName] = entries[i];
+                variableMapping[variableName] = entry; // Map the variable name to the corresponding entry
             }
         }
-    }
-    
+    });
+
+    // Substitute all variables in the editor content using the complete mapping
     const result = substituteVariables(editContent, variableMapping);
+
     console.log('Variable Mappings:', variableMapping);
-    console.log(result);
-    return result;
+    console.log('Generated Result:', result);
+
+    return result; // Return the substituted result
 }
 
 
@@ -142,7 +146,7 @@ function parseCSVData(csvData) {
         const quotesMatch = (tempLine.match(/"/g) || []).length % 2 === 0;
 
         if (quotesMatch) {
-            // Parse the line into an array
+            // Parse the line into an array while retaining the contents inside cells
             const parsedLine = parseCSVLine(tempLine);
             result.push(parsedLine);
             tempLine = ''; // Reset tempLine for the next entry
@@ -152,25 +156,33 @@ function parseCSVData(csvData) {
     return result;
 }
 
-// Function to parse a single line
 function parseCSVLine(line) {
-    const regex = /"(.*?)"|([^,]+)/g; // Match quoted or unquoted fields
-    const fields = [];
-    let match;
+    const cells = [];
+    let cell = '';
+    let inQuotes = false;
 
-    while ((match = regex.exec(line))) {
-        if (match[1] !== undefined) {
-            // Handle quoted fields
-            const cleanedField = match[1]
-                .replace(/""/g, '"');  // Replace double quotes (`""` => `"`)
-            fields.push(cleanedField);
-        } else if (match[2] !== undefined) {
-            // Handle unquoted fields
-            fields.push(match[2]);
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+
+        if (char === '"' && (i === 0 || line[i - 1] !== '\\')) {
+            // Toggle the inQuotes flag when encountering a quote
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            // If not in quotes and a comma is found, push the current cell
+            cells.push(cell.trim());
+            cell = '';
+        } else {
+            // Add the character to the current cell, including newlines inside quotes
+            cell += char;
         }
     }
 
-    return fields.map(field => field.replace(/^"|"$/g, '')); // Remove surrounding quotes if present
+    // Push the last cell
+    if (cell) {
+        cells.push(cell.trim());
+    }
+
+    return cells;
 }
 require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs' }});
 require(['vs/editor/editor.main'], function () {
@@ -241,24 +253,29 @@ document.getElementById('appForm').onsubmit = async function(event) {
     const editorContent = editorValue.getEditorContent();
     const parsedData = dataModule.getParsedData();
     const files = [];
-    for (let i = 0; i < parsedData.length; i++) {
-        const entry = parsedData[i];
+    parsedData.forEach((entry, index) => {
         console.log('Entry:', entry);
-        var parseDataLength = parsedData[i].length;
-        const generatedContent = handleVarInputes(entry,editorContent,parseDataLength,i);
+        const parseDataLength = entry.length;
+    
+        // Generate content for each entry
+        const generatedContent = handleVarInputes(entry, editorContent, parseDataLength, index);
+    
+        // Add to the files array
+        files.push({ 
+            name: `${index + 1}.html`, 
+            content: generatedContent 
+        });
+    });
 
-        files.push({ name: `file_${i + 1}.html`, content: generatedContent });
-    }
+     const outputDir = document.getElementById('selectedFolder').innerText;
+     if (!outputDir || outputDir === 'No folder selected') {
+         alert('Please select a valid folder to save the file.');
+         return;
+     }
 
-    const outputDir = document.getElementById('selectedFolder').innerText;
-    if (!outputDir || outputDir === 'No folder selected') {
-        alert('Please select a valid folder to save the file.');
-        return;
-    }
-
-    try {
-        const outputPath = window.fileModule.saveRar(files, outputDir);
-        alert(`Generated .rar file saved at: ${outputPath}`);
+     try {
+         const outputPath = window.fileModule.saveRar(files, outputDir);
+         alert(`Generated .rar file saved at: ${outputPath}`);
 
         // Open the folder in the system's file explorer
         const folderOpened = await window.fileModule.openFolder(outputDir);
