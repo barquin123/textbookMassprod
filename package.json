@@ -4,13 +4,15 @@
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "electron": "^34.0.0"
+    "electron": "^34.0.0",
+    "electron-builder": "^25.1.8"
   },
   "dependencies": {
     "@codemirror/basic-setup": "^0.20.0",
@@ -18,5 +20,52 @@
     "codemirror": "^6.0.1",
     "jszip": "^3.10.1",
     "monaco-editor": "^0.52.2"
+  },
+  "build": {
+  "appId": "com.example.textbookproject",
+  "productName": "TextbookProject",
+  "asar": true,
+  "npmRebuild": false,
+  "directories": {
+    "output": "dist"
+  },
+  "files": [
+    "main.js",
+    "node_modules/**/*",
+    "package.json",
+    "index.js",
+    "index.html",
+    "index.css",
+    "preload.js"
+  ],
+  "win": {
+      "target": [
+        {
+          "target": "nsis", 
+          "arch": ["x64", "ia32"]
+        },
+        {
+          "target": "portable", 
+          "arch": ["x64", "ia32"]
+        }
+      ]
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.education",
+      "identity": null
+    },
+    "linux": {
+      "target": ["AppImage", "deb", "tar.gz"],
+      "category": "Education",
+      "desktop": {
+        "Name": "TextbookProject",
+        "Comment": "An educational application for managing textbooks."
+      }
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   }
 }
