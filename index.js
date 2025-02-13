@@ -1,5 +1,23 @@
 window.handleInput = (e) => {
-  const value = e.target.value;
+    const inputFieldsContainer = document.getElementById('inputFields');
+    const inputFields = inputFieldsContainer.querySelectorAll('input'); // Get all input tags inside inputFields
+    let hasEmptyFields = false;
+
+    inputFields.forEach(input => {
+        if (!input.value.trim()) {
+            hasEmptyFields = true;
+        }
+    });
+
+    const submitButton = document.getElementById('submitFormButton');
+    if (hasEmptyFields) {
+      
+    } else {
+        submitButton.style.top = `50%`;
+        submitButton.style.left = `50%`;
+        submitButton.disabled = false;
+    }
+
 };
 
 
@@ -286,4 +304,32 @@ document.getElementById('appForm').onsubmit = async function(event) {
     }
 };
 
-  
+document.getElementById('submitFormButton').addEventListener('mouseover', function () {
+    const inputFieldsContainer = document.getElementById('inputFields');
+    const inputFields = inputFieldsContainer.querySelectorAll('input'); // Get all input tags inside inputFields
+    let hasEmptyFields = false;
+
+    inputFields.forEach(input => {
+        if (!input.value.trim()) {
+            hasEmptyFields = true;
+        }
+    });
+
+    const submitButton = document.getElementById('submitFormButton');
+    if (hasEmptyFields) {
+        // Generate random positions
+      // Generate random positions for top and left
+      const randomTop = Math.random() * 90; // Random number between 0 and 90%
+      const randomLeft = Math.random() * 90; // Random number between 0 and 90%
+
+      // Apply styles to move the button
+      submitButton.disabled = true;
+      submitButton.style.position = 'absolute';
+      submitButton.style.top = `${randomTop}%`;
+      submitButton.style.left = `${randomLeft}%`;
+    } else {
+        submitButton.style.top = `50%`;
+        submitButton.style.left = `50%`;
+        submitButton.disabled = false;
+    }
+});

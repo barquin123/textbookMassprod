@@ -8,24 +8,34 @@
 </head>
 <body>
     <form id="appForm">
-        <label for="startingNumber">Starting File Number:</label>
-        <input type="number" id="startingNumber" name="startingNumber" value="1" min="1" required>
-        <div class="clearfix"></div>
-        <!-- <input type="number" name="numberOfrows" id="numberOfrows"> -->
-         <div id="inputFields" class="textClone"></div>
-        <input type="file" name="csvFile" id="csvFile" accept=".csv">
-        <pre id="output"></pre>
-        <ul id="languageSelector">
-            <li data-language = 'html' class="active">HTML</li>
-            <li data-language = 'javascript'>JS</li>
-            <li data-language = 'css'>CSS</li>
-        </ul>
-        <div id="container" style="width: 300px; height: 300px;">
+        <div class="formContainerInner">
+            <div class="fields">
+                <label for="startingNumber">Starting File Number:</label>
+                <input type="number" id="startingNumber" name="startingNumber" value="1" min="1" required>
+                <div class="fileSelectField">
+                    <button type="button" id="selectFolder">Save To</button>
+                    <span id="selectedFolder">No folder selected</span>
+                </div>
+                <div class="clearfix"></div>
+                <!-- <input type="number" name="numberOfrows" id="numberOfrows"> -->
+                <div id="inputFields" class="textClone"></div>
+                <label class="customFileField" for="csvFile">Choose CSV File</label>
+                <input type="file" name="csvFile" id="csvFile" accept=".csv" style="display: none;">
+            </div>
+        
+            <div class="editorSide">
+                <ul id="languageSelector">
+                    <li data-language = 'html' class="active">HTML</li>
+                    <li data-language = 'javascript'>JS</li>
+                    <li data-language = 'css'>CSS</li>
+                </ul>
+                <div id="container" style="width: 100%; height: 70vh;">
+                </div>
+            </div>
         </div>
-        <label for="outputDir">Save to:</label>
-        <button type="button" id="selectFolder">Select Folder</button>
-        <span id="selectedFolder"></span>
-        <button type="submit">Submit</button>
+        <div class="submitBtn">
+            <button id="submitFormButton" type="submit">Submit</button>
+        </div>
     </form>
     <script defer src="./index.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs/loader.js"></script>

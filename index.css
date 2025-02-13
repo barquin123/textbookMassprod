@@ -13,5 +13,83 @@ ul#languageSelector li {
 }
 
 ul#languageSelector li.active {
-    background: antiquewhite;
+    background: rgb(1, 69, 153);
+    color: #fff;
+}
+
+button#selectFolder {
+    background: rgb(1, 69, 153);
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+}
+body.enable-motion.underline-links {
+    padding: 20px;
+}
+.formContainerInner > div {
+    width: 100%;
+}
+.formContainerInner {
+    display: flex
+;
+    gap: 30px;
+    justify-content: space-evenly;
+}
+.fields {
+    padding: 20px 0;
+}
+input#startingNumber {
+    margin: 15px 0;
+}
+input {
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+div#inputFields {
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+    margin-block: 10px;
+}
+input#csvFile {
+    border: none;
+    margin: 0;
+    padding: 0;
+    border-radius: 0;
+}
+label.customFileField {
+    margin: 10px 0;
+    border: 2px dashed #ddd;
+    width: 100%;
+    display: block;
+    max-width: 300px;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+}
+.submitBtn {
+    width: 100%;
+    height: 15vh;
+    position: relative;
+}
+
+button#submitFormButton {
+    padding: 10px 20px;
+    border: none;
+    background: rgb(1, 69, 153);
+    color: #fff;
+    font-weight: 700;
+    border-radius: 5px;
+    position: absolute;
+    left: 50%;
+    transform: translate(-50%);
+    top: 50%;
+}
+
+button{
+    cursor: pointer;
+}
+ul#languageSelector li {
+    cursor: pointer;
 }
