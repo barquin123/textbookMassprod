@@ -1,6 +1,5 @@
 window.handleInput = (e) => {
   const value = e.target.value;
-  console.log(value);
 };
 
 
@@ -40,13 +39,11 @@ document.getElementById('csvFile').addEventListener('change', function(event) {
             const content = e.target.result;
             const parsedData = parseCSVData(content);
             dataModule.setParsedData(parsedData);
-            console.log(parsedData);
 
             // Display the parsed data in the output element
             // document.getElementById('output').innerText = JSON.stringify(parsedData, null, 2);
 
             // Log the split data
-            // console.log(parsedData);
             processCSVData()
         };
         reader.readAsText(file);
@@ -61,8 +58,6 @@ function processCSVData() {
     if (csvData) {
         const numberOfColumns = csvData[0].length;
         createFields(numberOfColumns,csvData);
-        // console.log(csvData[0].length);
-        // console.log(csvData[0]);
     }
 }
 
@@ -121,10 +116,6 @@ function handleVarInputes(entries, editContent, parseDataLength, index) {
 
     // Substitute all variables in the editor content using the complete mapping
     const result = substituteVariables(editContent, variableMapping);
-
-    console.log('Variable Mappings:', variableMapping);
-    console.log('Generated Result:', result);
-
     return result; // Return the substituted result
 }
 
@@ -232,7 +223,6 @@ require(['vs/editor/editor.main'], function () {
 
     editor.onDidChangeModelContent(function (event) {
         const editorVal = editor.getValue();
-        // console.log('Editor content:', editorValue);
         editorValue.setEditorContent(editorVal); // Log or use the value as needed
     });
 });
@@ -250,32 +240,40 @@ document.getElementById('selectFolder').addEventListener('click', async () => {
 document.getElementById('appForm').onsubmit = async function(event) {
     // Prevent the default form submission behavior
     event.preventDefault();
+
     const editorContent = editorValue.getEditorContent();
     const parsedData = dataModule.getParsedData();
+    const startingNumberInput = document.getElementById('startingNumber').value;
+    const startingNumber = parseInt(startingNumberInput, 10);
+
+    if (isNaN(startingNumber) || startingNumber < 1) {
+        alert('Please enter a valid starting number.');
+        return;
+    }
+
     const files = [];
     parsedData.forEach((entry, index) => {
-        console.log('Entry:', entry);
         const parseDataLength = entry.length;
-    
+
         // Generate content for each entry
         const generatedContent = handleVarInputes(entry, editorContent, parseDataLength, index);
-    
+
         // Add to the files array
         files.push({ 
-            name: `${index + 1}.html`, 
+            name: `${startingNumber + index}.html`, // Adjust filename using the starting number
             content: generatedContent 
         });
     });
 
-     const outputDir = document.getElementById('selectedFolder').innerText;
-     if (!outputDir || outputDir === 'No folder selected') {
-         alert('Please select a valid folder to save the file.');
-         return;
-     }
+    const outputDir = document.getElementById('selectedFolder').innerText;
+    if (!outputDir || outputDir === 'No folder selected') {
+        alert('Please select a valid folder to save the file.');
+        return;
+    }
 
-     try {
-         const outputPath = window.fileModule.saveRar(files, outputDir);
-         alert(`Generated .rar file saved at: ${outputPath}`);
+    try {
+        const outputPath = window.fileModule.saveRar(files, outputDir);
+        alert(`Generated .rar file saved at: ${outputPath}`);
 
         // Open the folder in the system's file explorer
         const folderOpened = await window.fileModule.openFolder(outputDir);
@@ -286,6 +284,6 @@ document.getElementById('appForm').onsubmit = async function(event) {
         console.error('Error during submission:', error);
         alert('An error occurred while saving the .rar file. Check the console for details.');
     }
-  };
+};
 
   

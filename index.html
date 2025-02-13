@@ -8,7 +8,8 @@
 </head>
 <body>
     <form id="appForm">
-        <input type="text" name="htmlName" id="htmlName" oninput="handleInput(event)">
+        <label for="startingNumber">Starting File Number:</label>
+        <input type="number" id="startingNumber" name="startingNumber" value="1" min="1" required>
         <div class="clearfix"></div>
         <!-- <input type="number" name="numberOfrows" id="numberOfrows"> -->
          <div id="inputFields" class="textClone"></div>
