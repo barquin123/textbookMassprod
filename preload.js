@@ -8,27 +8,53 @@ window.addEventListener('DOMContentLoaded', () => {
       replaceText(`${dependency}-version`, process.versions[dependency])
     }
   })
-
-  const { contextBridge } = require('electron');
-const fs = require('fs');
-const path = require('path');
-const AdmZip = require('adm-zip');
-
-contextBridge.exposeInMainWorld('fileModule', {
-    saveRar: (files) => {
-        const outputDir = path.join(__dirname, 'output');
-        if (!fs.existsSync(outputDir)) {
-            fs.mkdirSync(outputDir, { recursive: true });
+  
+  const { contextBridge, ipcRenderer, shell } = require('electron');
+  const fs = require('fs');
+  const path = require('path');
+  const AdmZip = require('adm-zip');
+  
+  contextBridge.exposeInMainWorld('fileModule', {
+    selectFolder: async () => {
+        try {
+            const folder = await ipcRenderer.invoke('dialog:selectFolder');
+            return folder || null; // Return the folder path or null if no folder was selected
+        } catch (error) {
+            console.error('Error selecting folder:', error);
+            return null;
         }
+    },
+    saveRar: (files, outputDir) => {
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const AdmZip = require('adm-zip');
 
-        const zip = new AdmZip();
-        files.forEach(file => {
-            zip.addFile(file.name, Buffer.from(file.content, 'utf8'));
-        });
+            if (!fs.existsSync(outputDir)) {
+                fs.mkdirSync(outputDir, { recursive: true });
+            }
 
-        const outputPath = path.join(outputDir, 'generated_files.rar');
-        zip.writeZip(outputPath);
+            const zip = new AdmZip();
+            files.forEach(file => {
+                zip.addFile(file.name, Buffer.from(file.content, 'utf8'));
+            });
 
-        return outputPath;
+            const outputPath = path.join(outputDir, 'generated_files.rar');
+            zip.writeZip(outputPath);
+
+            return outputPath;
+        } catch (error) {
+            console.error('Error saving .rar file:', error);
+            throw new Error('Failed to save the .rar file.');
+        }
+    },
+    openFolder: async (folderPath) => {
+        try {
+            const result = await shell.openPath(folderPath);
+            return result === ''; // `shell.openPath` returns an empty string on success
+        } catch (error) {
+            console.error('Error opening folder:', error);
+            return false;
+        }
     },
 });

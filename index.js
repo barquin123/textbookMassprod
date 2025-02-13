@@ -40,6 +40,7 @@ document.getElementById('csvFile').addEventListener('change', function(event) {
             const content = e.target.result;
             const parsedData = parseCSVData(content);
             dataModule.setParsedData(parsedData);
+            console.log(JSON.stringify(content));
 
             // Display the parsed data in the output element
             document.getElementById('output').innerText = JSON.stringify(parsedData, null, 2);
@@ -224,6 +225,15 @@ require(['vs/editor/editor.main'], function () {
     });
 });
 
+document.getElementById('selectFolder').addEventListener('click', async () => {
+    const folder = await window.fileModule.selectFolder();
+    if (folder) {
+        document.getElementById('selectedFolder').innerText = folder;
+    } else {
+        document.getElementById('selectedFolder').innerText = 'No folder selected';
+    }
+});
+
 // JavaScript to handle form submission
 document.getElementById('appForm').onsubmit = async function(event) {
     // Prevent the default form submission behavior
@@ -240,7 +250,25 @@ document.getElementById('appForm').onsubmit = async function(event) {
         files.push({ name: `file_${i + 1}.html`, content: generatedContent });
     }
 
-    // Use the exposed fileModule to save the .rar file
-    const outputPath = window.fileModule.saveRar(files);
-    console.log(`Generated .rar file saved at ${outputPath}`);
+    const outputDir = document.getElementById('selectedFolder').innerText;
+    if (!outputDir || outputDir === 'No folder selected') {
+        alert('Please select a valid folder to save the file.');
+        return;
+    }
+
+    try {
+        const outputPath = window.fileModule.saveRar(files, outputDir);
+        alert(`Generated .rar file saved at: ${outputPath}`);
+
+        // Open the folder in the system's file explorer
+        const folderOpened = await window.fileModule.openFolder(outputDir);
+        if (!folderOpened) {
+            console.error('Failed to open folder.');
+        }
+    } catch (error) {
+        console.error('Error during submission:', error);
+        alert('An error occurred while saving the .rar file. Check the console for details.');
+    }
   };
+
+  
