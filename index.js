@@ -120,6 +120,7 @@ function handleVarInputes (entries,editContent,parseDataLength,index) {
     const result = substituteVariables(editContent, variableMapping);
     console.log('Variable Mappings:', variableMapping);
     console.log(result);
+    return result;
 }
 
 
@@ -224,18 +225,22 @@ require(['vs/editor/editor.main'], function () {
 });
 
 // JavaScript to handle form submission
-document.getElementById('appForm').onsubmit = function(event) {
+document.getElementById('appForm').onsubmit = async function(event) {
     // Prevent the default form submission behavior
     event.preventDefault();
     const editorContent = editorValue.getEditorContent();
     const parsedData = dataModule.getParsedData();
+    const files = [];
     for (let i = 0; i < parsedData.length; i++) {
         const entry = parsedData[i];
         console.log('Entry:', entry);
         var parseDataLength = parsedData[i].length;
-        handleVarInputes(entry,editorContent,parseDataLength,i);
+        const generatedContent = handleVarInputes(entry,editorContent,parseDataLength,i);
+
+        files.push({ name: `file_${i + 1}.html`, content: generatedContent });
     }
 
-    // console.log('Editor content:', editorContent);
-    // console.log('Parsed data:', parsedData.length);
+    // Use the exposed fileModule to save the .rar file
+    const outputPath = window.fileModule.saveRar(files);
+    console.log(`Generated .rar file saved at ${outputPath}`);
   };
