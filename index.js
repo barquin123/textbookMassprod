@@ -156,12 +156,14 @@ function parseCSVData(csvData) {
         tempLine += (tempLine ? '\n' : '') + line;
 
         // Check if the line ends properly (even number of quotes)
-        const quotesMatch = (tempLine.match(/"/g) || []).length % 2 === 0;
+        const quotesMatch = (tempLine.match(/\"/g) || []).length % 2 === 0;
 
         if (quotesMatch) {
             // Parse the line into an array while retaining the contents inside cells
             const parsedLine = sanitizeParsedLine(parseCSVLine(tempLine));
-            result.push(parsedLine);
+            if (parsedLine.some(cell => cell !== '')) { // Ignore completely empty rows
+                result.push(parsedLine);
+            }
             tempLine = ''; // Reset tempLine for the next entry
         }
     }
@@ -177,9 +179,9 @@ function parseCSVLine(line) {
     for (let i = 0; i < line.length; i++) {
         const char = line[i];
 
-        if (char === '"') {
+        if (char === '\"') {
             // Toggle the inQuotes flag when encountering a quote
-            if (inQuotes && line[i + 1] === '"') {
+            if (inQuotes && line[i + 1] === '\"') {
                 // Handle escaped double quotes by adding one and skipping the next
                 cell += '"';
                 i++; // Skip the next quote
@@ -201,11 +203,12 @@ function parseCSVLine(line) {
         cells.push(cell);
     }
 
-    return cells;
+    // Sanitize and convert special characters to HTML-safe equivalents
+    return cells.map(c => encodeForHTML(c.trim()));
 }
 
 function sanitizeParsedLine(parsedLine) {
-    return parsedLine.map(cell => encodeForHTML(cell.trim()));
+    return parsedLine.map(cell => cell.trim());
 }
 
 function encodeForHTML(str) {
@@ -214,7 +217,7 @@ function encodeForHTML(str) {
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
+        .replace(/\"/g, '&quot;')
         .replace(/'/g, '&#39;');
 }
 // parsing ends here
@@ -297,10 +300,10 @@ document.getElementById('appForm').onsubmit = async function(event) {
 
     const files = [];
     parsedData.forEach((entry, index) => {
-        const parseDataLength = entry.length;
+        if (entry.every(cell => cell === '')) return; // Skip empty rows
 
         // Generate content for each entry
-        const generatedContent = handleVarInputes(entry, editorContent, parseDataLength, index);
+        const generatedContent = handleVarInputes(entry, editorContent, entry.length, index);
 
         // Add to the files array
         files.push({ 
