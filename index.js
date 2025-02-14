@@ -105,7 +105,10 @@ function createFields(numberOfColumns, parsedData) {
 function substituteVariables(template, variableMapping) {
     return template.replace(/\${(.*?)}/g, (_, variableName) => {
         // Replace placeholders with corresponding values from the mapping
-        return variableMapping[variableName] || `\${${variableName}}`;
+        const value = variableMapping[variableName] || `\${${variableName}}`;
+
+        // Escape double quotes and single quotes to Unicode
+        return value.replace(/"/g, '\\u0022').replace(/'/g, '\\u0027');
     });
 }
 
@@ -141,6 +144,7 @@ function handleVarInputes(entries, editContent, parseDataLength, index) {
 
 
 // Function to parse CSV data
+// working codes unicode
 function parseCSVData(csvData) {
     const lines = csvData.split(/\r?\n/); // Split into lines
     const result = [];
@@ -156,7 +160,7 @@ function parseCSVData(csvData) {
 
         if (quotesMatch) {
             // Parse the line into an array while retaining the contents inside cells
-            const parsedLine = parseCSVLine(tempLine);
+            const parsedLine = sanitizeParsedLine(parseCSVLine(tempLine));
             result.push(parsedLine);
             tempLine = ''; // Reset tempLine for the next entry
         }
@@ -173,12 +177,18 @@ function parseCSVLine(line) {
     for (let i = 0; i < line.length; i++) {
         const char = line[i];
 
-        if (char === '"' && (i === 0 || line[i - 1] !== '\\')) {
+        if (char === '"') {
             // Toggle the inQuotes flag when encountering a quote
-            inQuotes = !inQuotes;
+            if (inQuotes && line[i + 1] === '"') {
+                // Handle escaped double quotes by adding one and skipping the next
+                cell += '"';
+                i++; // Skip the next quote
+            } else {
+                inQuotes = !inQuotes;
+            }
         } else if (char === ',' && !inQuotes) {
             // If not in quotes and a comma is found, push the current cell
-            cells.push(cell.trim());
+            cells.push(cell);
             cell = '';
         } else {
             // Add the character to the current cell, including newlines inside quotes
@@ -188,11 +198,27 @@ function parseCSVLine(line) {
 
     // Push the last cell
     if (cell) {
-        cells.push(cell.trim());
+        cells.push(cell);
     }
 
     return cells;
 }
+
+function sanitizeParsedLine(parsedLine) {
+    return parsedLine.map(cell => encodeForHTML(cell.trim()));
+}
+
+function encodeForHTML(str) {
+    // Replace special characters with HTML-safe equivalents
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+// parsing ends here
+
 require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@latest/min/vs' }});
 require(['vs/editor/editor.main'], function () {
     const editor = monaco.editor.create(document.getElementById('container'), {
